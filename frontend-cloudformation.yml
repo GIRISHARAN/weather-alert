@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+  
+  weatherInstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for EC2 instance
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  weatherInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: ami-0f34c5ae932e6f0e4
+      SecurityGroups:
+        - Ref: weatherInstanceSecurityGroup
+      KeyName: vockey 
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          yum update -y
+          yum install docker -y
+          service docker start
+          usermod -a -G docker ec2-user
+          docker run -p 443:3000 girisharanreddy/weather-frontend-image
